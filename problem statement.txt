@@ -1,0 +1,17 @@
+
+AI Based Application Performance Regression Detector with Root Cause Insights
+
+PROBLEM STATEMENT:
+
+Application performance regressions negatively impact user experience but are often detected late due to manual log analysis and monitoring alert noise. Identifying root causes is complex and requires expert analysis, delaying remediation. Existing tools generate alerts but lack contextual explanations. There is a need for a generative AI assistant that analyzes performance metrics and logs to detect regressions early and provide neutral languages root cause insights, accelerating resolution. 
+
+Data considerations:
+
+Performance metrics( CPU,memory,latency) in JSON or CSV application logs in text format, historical regression incidents;preprocessing for anomaly detection;privacy for applivcation data;synthetic regression scenarios for testing.
+
+consider using synthetic or anonymized data where appropriate.Ensure data quality and relevance to the problem context.
+
+
+OUTPUT EXPECTATIONS:
+
+A web app where engineers upload performance data and logs and receive AI_generated regression alerts with root cause narratives; integration with monitoring APIs for demo; dashboard showing trends and alert history; metrics on detection accuracy and time saved ; demo include regression scenario simulation. 
