@@ -1,0 +1,56 @@
+How to Run
+Step 1 — Go to folders
+cd app_pulse_ai
+
+
+Step 2 — Create virtual environment
+Windows
+python -m venv venv
+
+Activate:
+
+venv\Scripts\activate
+Step 3 — Install dependencies
+pip install -r requirements.txt
+Step 4 — Run Streamlit app
+streamlit run App_Pulse_AI.py
+Step 5 — Open browser
+
+Usually opens automatically:
+
+http://localhost:8501
+📊 What Happens When You Upload File
+
+Example:
+
+metrics.ods
+
+System will:
+
+✅ display dataframe
+✅ create charts
+✅ detect anomalies
+✅ detect regressions
+✅ generate recommendations
+✅ create vector DB
+✅ enable chatbot
+
+🤖 Example Questions You Can Ask
+Why did CPU spike?
+Any deployment related issue?
+Show anomalies in latency
+What is the highest memory usage?
+🚀 What You’ve Actually Built
+
+You are no longer building just a dashboard.
+
+This is becoming:
+
+AI-Powered APM Platform
+
+Similar concepts used in:
+
+Datadog
+New Relic
+Dynatrace
+Splunk

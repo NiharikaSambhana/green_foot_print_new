@@ -1,0 +1,341 @@
+🚀 APP Pulse AI — Complete Flow Explanation
+
+Your project is now divided into modules.
+
+Each module has ONE responsibility.
+
+This is exactly how production AI systems are designed.
+
+📁 Overall Architecture
+User Uploads ODS File
+        ↓
+Preprocessing
+        ↓
+Guardrails Validation
+        ↓
+AI Agents Analysis
+        ↓
+RAG Embedding + Retrieval
+        ↓
+Charts + Insights + Chatbot
+📄 App_Pulse_AI.py
+
+This is the main application.
+
+Think of it as:
+
+the controller
+dashboard
+orchestrator
+
+It connects EVERYTHING.
+
+✅ What it does
+1. Uploads ODS file
+uploaded_file = st.file_uploader(...)
+
+User uploads performance metrics.
+
+Example:
+
+Time	CPU %	Memory %	API Latency
+2. Loads dataframe
+df = pd.read_excel(file, engine="odf")
+
+Reads ODS spreadsheet into pandas.
+
+3. Cleans data
+df = clean_dataframe(df)
+
+Removes:
+
+spaces
+duplicates
+formatting issues
+4. Converts columns to numeric
+df = convert_numeric_columns(df)
+
+Without this:
+
+charts fail
+ML models fail
+anomaly detection breaks
+5. Validates dataset
+missing_cols = validate_dataframe(df)
+
+Checks:
+
+Time column exists
+required fields exist
+
+This is a guardrail.
+
+6. Creates vector database
+create_vector_store(df)
+
+This powers RAG.
+
+Converts your metrics into embeddings.
+
+7. Runs AI agents
+performance_agent.analyze(df)
+
+Each agent performs a specialized task.
+
+8. Displays insights
+st.warning(...)
+
+Shows:
+
+CPU spikes
+memory issues
+deployment correlations
+9. Detects anomalies
+IsolationForest()
+
+Machine learning identifies unusual rows.
+
+10. Creates charts
+px.line(...)
+
+Visualizes metrics over time.
+
+11. Runs RAG chatbot
+retriever.get_relevant_documents(query)
+
+Searches relevant performance data using embeddings.
+
+📁 rag/
+
+This folder handles RAG.
+
+RAG = Retrieval-Augmented Generation.
+
+📄 embeddings.py
+Purpose
+
+Loads embedding model.
+
+HuggingFaceEmbeddings()
+✅ What are embeddings?
+
+Embeddings convert text into vectors.
+
+Example:
+
+"CPU spike"
+      ↓
+[0.123, 0.882, 0.292, ...]
+
+This allows semantic search.
+
+📄 ingest.py
+Purpose
+
+Creates vector database.
+
+Flow
+Dataframe
+   ↓
+Rows converted to text
+   ↓
+Text split into chunks
+   ↓
+Embeddings generated
+   ↓
+Stored in ChromaDB
+Example
+
+Row:
+
+Time: 10:05 | CPU: 95 | Event: Deployment
+
+Gets stored as vector embedding.
+
+📄 retriever.py
+Purpose
+
+Searches vector DB.
+
+Example
+
+User asks:
+
+"Why did latency increase?"
+
+Retriever finds similar rows:
+
+deployment events
+high latency rows
+anomalies
+📁 agents/
+
+Agents are AI workers.
+
+Each has ONE responsibility.
+
+📄 performance_agent.py
+Purpose
+
+Detect performance problems.
+
+What it checks
+CPU > 85%
+Memory > 90%
+Latency > 500ms
+Output Example
+High CPU usage detected: 95%
+📄 anomaly_agent.py
+Purpose
+
+Machine learning anomaly detection.
+
+Uses:
+
+IsolationForest
+What it does
+
+Finds unusual rows.
+
+Example anomaly:
+
+CPU	Memory	Latency
+99	95	5000
+Why important?
+
+Real production systems:
+
+crash unexpectedly
+leak memory
+spike CPU
+
+Anomaly detection catches hidden issues.
+
+📄 rootcause_agent.py
+Purpose
+
+Find probable reasons.
+
+Example logic
+if "deploy" in Event:
+
+Detects:
+
+deployments
+restarts
+incidents
+Output
+Performance issue may be related to deployment activity.
+📄 recommendation_agent.py
+Purpose
+
+Suggest fixes.
+
+Example recommendations
+Increase CPU allocation
+Optimize APIs
+Investigate memory leaks
+📁 guardrails/
+
+Guardrails protect the AI system.
+
+Critical in production.
+
+📄 validations.py
+Purpose
+
+Validates uploaded data.
+
+Prevents
+
+❌ missing Time column
+❌ broken datasets
+❌ malformed files
+
+📄 security_guard.py
+Purpose
+
+Blocks malicious prompts.
+
+Prevents
+Ignore previous instructions
+Delete database
+Hack system
+
+This protects LLMs.
+
+📄 hallucination_guard.py
+Purpose
+
+Reduces hallucinations.
+
+What is hallucination?
+
+LLM invents fake answers.
+
+Example:
+
+"Database crash detected"
+
+Even though data never mentioned it.
+
+Solution
+
+Checks if response matches retrieved data.
+
+📁 utils/
+
+Reusable helper functions.
+
+📄 preprocessing.py
+Purpose
+
+Cleans data.
+
+Functions
+clean_dataframe()
+
+Removes:
+
+duplicates
+whitespace
+formatting issues
+convert_numeric_columns()
+
+Converts:
+
+"95"
+
+into:
+
+95
+
+Required for ML + charts.
+
+📄 metrics.py
+Purpose
+
+Calculates summaries.
+
+Example
+mean CPU
+max memory
+min latency
+📄 prompts.py
+Purpose
+
+Stores LLM system prompts.
+
+Example
+You are APP Pulse AI...
+
+This controls AI behavior.
+
+📄 config.py
+
+Central configuration file.
+
+Stores
+CPU_THRESHOLD = 85
+
+Instead of hardcoding everywhere.
