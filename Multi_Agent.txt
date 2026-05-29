@@ -1,0 +1,139 @@
+import os
+from typing import TypedDict, Literal
+from dotenv import load_dotenv
+
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage
+from langgraph.graph import StateGraph, END
+
+load_dotenv()
+
+# ====================== LLM ======================
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)  # Fast & cheap for hackathon
+
+# ====================== STATE ======================
+class AgentState(TypedDict):
+    messages: list
+    next: str
+
+# ====================== TOOLS / FUNCTIONS ======================
+def estimate_carbon(input_tokens: int, output_tokens: int, model: str = "gpt-4o", region: str = "IN-KA"):
+    """Simple Carbon Estimation"""
+    model_factors = {"gpt-4o": 0.45, "claude-3.5": 0.50, "llama": 0.65, "default": 0.4}
+    energy_wh = (input_tokens + output_tokens) / 1000 * model_factors.get(model.lower(), 0.4)
+    pue = 1.18
+    energy_kwh = energy_wh * pue / 1000
+    carbon_intensity = 520  # Default for Karnataka
+    co2e_kg = round(energy_kwh * (carbon_intensity / 1000), 6)
+    
+    return {
+        "co2e_kg": co2e_kg,
+        "co2e_g": round(co2e_kg * 1000, 2),
+        "equivalent": f"≈ {round(co2e_kg * 1000 / 0.4, 1)} km by car"
+    }
+
+# ====================== AGENTS ======================
+def supervisor(state: AgentState):
+    system_prompt = """You are a strict supervisor for AI Carbon Footprint system.
+    Only handle queries related to carbon emissions, LLM usage logs, sustainability, or optimization.
+    
+    Choose one:
+    - estimator → for single prompt carbon calculation
+    - log_analyzer → for analyzing production logs
+    - optimizer → for reducing carbon footprint suggestions
+    - reporter → for generating reports
+    - END → if completely off-topic
+    
+    Reply with only the next node name."""
+
+    response = llm.invoke([HumanMessage(content=system_prompt)] + state["messages"])
+    decision = response.content.strip().lower()
+    
+    if "estimator" in decision:
+        return {"next": "estimator"}
+    elif "log" in decision or "analyzer" in decision:
+        return {"next": "log_analyzer"}
+    elif "optimizer" in decision:
+        return {"next": "optimizer"}
+    elif "report" in decision or "reporter" in decision:
+        return {"next": "reporter"}
+    else:
+        return {"next": END}
+
+def estimator_agent(state: AgentState):
+    last_msg = state["messages"][-1].content
+    # Simple parsing (for hackathon)
+    # In real version, use structured output
+    print("🔍 Estimator Agent running...")
+    result = estimate_carbon(500, 300, "gpt-4o")  # Default example
+    response = f"✅ **Carbon Estimate**\nCO₂e: {result['co2e_g']} grams\nEquivalent: {result['equivalent']}"
+    return {"messages": state["messages"] + [AIMessage(content=response)]}
+
+def log_analyzer_agent(state: AgentState):
+    print("📊 Log Analyzer Agent running...")
+    response = """📈 **Production Log Summary**
+- Total Prompts: 1247
+- Total CO₂e: 0.87 kg
+- Highest Impact Region: IN-KA (520 g/kWh)
+- Top Model: gpt-4o
+Recommendation: Move 30% workload to low-carbon regions at night."""
+    return {"messages": state["messages"] + [AIMessage(content=response)]}
+
+def optimizer_agent(state: AgentState):
+    print("♻️ Optimizer Agent running...")
+    response = """💡 **Optimization Suggestions**
+1. Use smaller model (gpt-4o-mini) → 60% less emissions
+2. Enable prompt caching
+3. Route to low-carbon regions (e.g., Nordics)
+4. Set daily carbon budget alerts"""
+    return {"messages": state["messages"] + [AIMessage(content=response)]}
+
+def reporter_agent(state: AgentState):
+    print("📋 Reporter Agent running...")
+    response = """📊 **Sustainability Report**
+Team Carbon Footprint (This Week):
+- R&D: 0.45 kg CO₂e
+- Marketing: 0.28 kg CO₂e
+Total: 0.87 kg CO₂e
+Target Achievement: 78% towards Net Zero goal"""
+    return {"messages": state["messages"] + [AIMessage(content=response)]}
+
+# ====================== BUILD GRAPH ======================
+workflow = StateGraph(AgentState)
+
+workflow.add_node("supervisor", supervisor)
+workflow.add_node("estimator", estimator_agent)
+workflow.add_node("log_analyzer", log_analyzer_agent)
+workflow.add_node("optimizer", optimizer_agent)
+workflow.add_node("reporter", reporter_agent)
+
+workflow.set_entry_point("supervisor")
+
+workflow.add_conditional_edges(
+    "supervisor",
+    lambda x: x["next"]
+)
+
+for node in ["estimator", "log_analyzer", "optimizer", "reporter"]:
+    workflow.add_edge(node, "supervisor")  # Return to supervisor after each agent
+
+graph = workflow.compile()
+
+# ====================== RUN ======================
+def run_query(query: str):
+    initial_state = {
+        "messages": [HumanMessage(content=query)],
+        "next": ""
+    }
+    result = graph.invoke(initial_state)
+    return result["messages"][-1].content
+
+# Test
+if __name__ == "__main__":
+    print("🌍 CarbonGuard AI - Hackathon Demo")
+    print("="*50)
+    while True:
+        q = input("\nEnter your query (or 'exit'): ")
+        if q.lower() in ["exit", "quit"]:
+            break
+        print(run_query(q))
